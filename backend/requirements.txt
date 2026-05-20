@@ -5,3 +5,5 @@ playwright
 requests
 pillow
 tenacity
+python-dotenv
+loguru

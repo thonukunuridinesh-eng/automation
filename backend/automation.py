@@ -1,9 +1,16 @@
+from loguru import logger
+import json
 from playwright.sync_api import sync_playwright
 from tenacity import retry, stop_after_attempt
 import random
 import time
 import os
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+proxy_server = os.getenv("PROXY")
 RESULTS_DIR = "results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
@@ -19,27 +26,22 @@ def run_pimeyes_search(image_path):
 
     with sync_playwright() as p:
 
-        browser = p.chromium.launch(
-            headless=False,
-            args=[
-                "--disable-blink-features=AutomationControlled"
-            ]
-        )
+       browser = p.chromium.launch(
+        headless=False,
+    proxy={
+        "server": proxy_server
+    },
+    args=[
+        "--disable-blink-features=AutomationControlled"
+    ]
+)
 
-        context = browser.new_context(
-            viewport={"width": 1400, "height": 900},
-            user_agent=(
-                "Mozilla/5.0 "
-                "(Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 "
-                "(KHTML, like Gecko) "
-                "Chrome/124 Safari/537.36"
-            )
-        )
+    context = browser.new_context(
+    storage_state="state.json"
+)
 
-        page = context.new_page()
-
-        try:
+    page = context.new_page()  
+    try:
 
             print("Opening PimEyes...")
 
@@ -47,7 +49,13 @@ def run_pimeyes_search(image_path):
                 "https://pimeyes.com/en",
                 timeout=120000
             )
+            random_delay()
 
+            page.mouse.move(300, 400)
+
+            random_delay()
+
+            page.mouse.wheel(0, 500)
             random_delay()
 
             print("Uploading Image...")
@@ -87,10 +95,14 @@ def run_pimeyes_search(image_path):
 
             context.storage_state(path="state.json")
 
-        except Exception as e:
-            print("Automation Error:", e)
+                except Exception as e:
+             print("Automation Error:", e)
 
         finally:
-            browser.close()
+           context.storage_state(path="state.json")
+           browser.close()
 
-    return extracted_results
+        with open("results/results.json", "w") as f:
+             json.dump(extracted_results, f, indent=4)
+
+return extracted_results
