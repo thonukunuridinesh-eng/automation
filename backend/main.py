@@ -1,3 +1,13 @@
+import os
+import shutil
+from fastapi import FastAPI, UploadFile, File
+
+app = FastAPI()
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
 @app.post("/search")
 async def search_face(file: UploadFile = File(...)):
 
