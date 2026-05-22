@@ -51,7 +51,7 @@ export default function Home() {
     try {
 
       const response = await axios.post(
-        'http://127.0.0.1:8000/search',
+        'https://automation-9f10.onrender.com',
         formData,
         {
           headers: {
